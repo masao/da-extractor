@@ -26,17 +26,17 @@ class WikipediaDocs
     response.body
   end
 
-  def linkshere( titles )
+  def linkshere( title )
     json = api_get( { action: "query",
-                      titles: titles.join( "|" ),
+                      titles: title,
                       prop: "linkshere",
                       lhnamespace: 0,
-                      lhlimits: 100,
-                      format: json,
+                      lhlimit: :max,
+                      format: :json,
                     } )
     obj = JSON.load( json )
-    result = {}
-    obj["query"]["pages"].values.first["linkshere"]
+    result = obj["query"]["pages"].values.first["linkshere"]
+    result
   end
 
   def day_info( date = Date.today )
@@ -80,4 +80,5 @@ end
 if $0 == __FILE__
   jawp = WikipediaDocs.new
   pp jawp.day_info
+  pp jawp.linkshere( "9月1日" )
 end
