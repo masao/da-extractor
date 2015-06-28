@@ -27,11 +27,18 @@ describe WikipediaDocs do
       expect( data[:event][1923].first ).to include( "関東大震災" )
     end
   end
-  describe "linkshere" do
+  describe "#linkshere" do
     it "should return valid results from September 1st" do
       jawp = WikipediaDocs.new
       data = jawp.linkshere( "9月1日" )
       expect( data.size ).to be 500
+    end
+  end
+  describe "#revisions" do
+    it "should return valid results from September 1st" do
+      jawp = WikipediaDocs.new
+      data = jawp.linkshere( "9月1日" )
+      expect( data.size ).to be >= 495
     end
   end
 end

@@ -39,6 +39,26 @@ class WikipediaDocs
     result
   end
 
+  def revisions( title )
+    params = {
+      action: "query",
+      titles: title,
+      prop: "revisions",
+      rvlimit: :max,
+      format: :json,
+    }
+    json = api_get( params )
+    obj = JSON.load( json )
+    result = obj["query"]["pages"].values.first["revisions"]
+    while obj[ "query-continue" ]
+      params = params.update( rvcontinue: obj["query-continue"]["revisions"]["rvcontinue"] )
+      json = api_get( params )
+      obj = JSON.load( json )
+      result += obj["query"]["pages"].values.first["revisions"]
+    end
+    result
+  end
+
   def day_info( date = Date.today )
     title = "#{ date.month }月#{ date.day }日"
     json = api_get( { action: "query",
@@ -81,4 +101,5 @@ if $0 == __FILE__
   jawp = WikipediaDocs.new
   pp jawp.day_info
   pp jawp.linkshere( "9月1日" )
+  pp jawp.revisions( "9月1日" )
 end
