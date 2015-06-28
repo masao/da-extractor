@@ -60,4 +60,11 @@ describe WikipediaDocs do
       expect( text ).to be_empty
     end
   end
+  describe "#get_content" do
+    it "should return wikitext" do
+      jawp = WikipediaDocs.new
+      content = jawp.get_content( "9月1日" )
+      expect( content ).to match /'''9月1日'''/
+    end
+  end
 end

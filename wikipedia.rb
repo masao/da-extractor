@@ -76,16 +76,15 @@ class WikipediaDocs
     result
   end
 
-  def day_info( date = Date.today )
-    title = "#{ date.month }月#{ date.day }日"
-    json = api_get( { action: "query",
-                      titles: title,
-                      prop: "revisions",
-                      rvprop: "content",
-                      format: "json",
-                    } )
+  def get_content( title )
+    json = api_get( action: :query, titles: title, prop: :revisions, rvprop: :content, format: :json )
     obj = JSON.load( json )
     wikitext = obj["query"]["pages"].values.first["revisions"].first["*"]
+  end
+
+  def day_info( date = Date.today )
+    title = "#{ date.month }月#{ date.day }日"
+    wikitext = get_content( title )
     result = {}
     section = nil
     wikitext.split( /\r?\n/ ).each do |line|
@@ -112,6 +111,9 @@ class WikipediaDocs
       end
     end
     result
+  end
+  
+  def list_info
   end
 
   def wikitext2text( wikitext )
