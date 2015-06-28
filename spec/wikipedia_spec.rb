@@ -56,6 +56,8 @@ describe WikipediaDocs do
       jawp = WikipediaDocs.new
       text = jawp.wikitext2text( "[[オーストリア・ハンガリー帝国|オーストリア]]と[[セルビア]]が密約を結び、セルビアはオーストリアの保護国化される。" )
       expect( text ).to eq "オーストリアとセルビアが密約を結び、セルビアはオーストリアの保護国化される。"
+      text = jawp.wikitext2text( "<!-- foo -->" )
+      expect( text ).to be_empty
     end
   end
 end

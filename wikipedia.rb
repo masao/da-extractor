@@ -115,7 +115,7 @@ class WikipediaDocs
   end
 
   def wikitext2text( wikitext )
-    text = wikitext.gsub( /\[\[(.+?)(\|.+?)?\]\]/ ) do |m|
+    text = wikitext.gsub( /<!--.*?-->/, "" ).gsub( /\[\[(.+?)(\|.+?)?\]\]/ ) do |m|
       pagename = $1
       pagename_s = $2
       if pagename_s
