@@ -100,7 +100,7 @@ class WikipediaDocs
         else
           section = nil
         end
-      when /^\*\s*\[\[(\d+)年\]\](（.*?\d+年.*?）)?\s*[:\-]?\s*(.*)$/
+      when /^\*\s*\[\[(\d+)年\]\](（.*?(?:\d+|元)年.*?）)?\s*[:\-]?\s*(.*)$/
         next if section.nil?
         year = $1.to_i
         jp_year = $2

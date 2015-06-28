@@ -36,6 +36,14 @@ describe WikipediaDocs do
       expect( data[:event][1923].first ).to include( "関東大震災" )
       expect( data[:event][1203].first ).not_to match /建仁/
     end
+    it "should omit a Japanese calendar" do
+      jawp = WikipediaDocs.new
+      data = jawp.day_info( Date.new( 2015, 6, 29 ) )
+      expect( data[:event] ).to have_key 1028
+      expect( data[:event][1028].first ).not_to match /長元/
+      expect( data[:event][1575].first ).not_to match /天正/
+      expect( data[:birth][1227].first ).not_to match /安貞/
+    end
   end
   describe "#linkshere" do
     it "should return valid results from September 1st" do
