@@ -77,7 +77,8 @@ class WikipediaDocs
   end
 
   def get_content( title )
-    json = api_get( action: :query, titles: title, prop: :revisions, rvprop: :content, format: :json )
+    redirect = redirect? title
+    json = api_get( action: :query, titles: redirect || title, prop: :revisions, rvprop: :content, format: :json )
     obj = JSON.load( json )
     wikitext = obj["query"]["pages"].values.first["revisions"].first["*"]
   end
@@ -112,15 +113,16 @@ class WikipediaDocs
     end
     result
   end
-  
+
   LINK_REGEXP = /\[\[(.+?)(\|.+?)?\]\]/
-  def list_info
-    wikitext = get_content "一覧の一覧"
+  def list_info( title = "一覧の一覧" )
+    wikitext = get_content( title )
     lists = []
     wikitext.split( /\r?\n/ ).each do |line|
       case line
-      when /\A\*\s*#{ LINK_REGEXP }/
+      when /\A\*+\s*#{ LINK_REGEXP }/
         article = $1
+        next if article.include? ":"
         lists << article
       end
     end
@@ -147,8 +149,13 @@ end
 
 if $0 == __FILE__
   jawp = WikipediaDocs.new
-  data = jawp.list_info
-  pp data
+  data = jawp.list_info( ARGV[0] )
+  p data.size
+  data.each do |article|
+    backlinks = jawp.linkshere( article )
+    revisions = jawp.revisions( article )
+    pp [ article, backlinks.to_a.size, revisions.to_a.size ]
+  end
   data = jawp.day_info
   #pp jawp.linkshere( "9月1日" )
   #pp jawp.revisions( "9月1日" )
