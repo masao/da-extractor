@@ -26,9 +26,25 @@ class WikipediaDocs
     response.body
   end
 
-  def linkshere( title )
-    json = api_get( { action: "query",
+  def redirect?( title )
+    json = api_get( { action: :query,
                       titles: title,
+                      redirects: true,
+                      format: :json,
+                    } )
+    obj = JSON.load( json )
+    title2 = obj["query"]["pages"].values.first["title"]
+    if title == title2
+      false
+    else
+      title2
+    end
+  end
+
+  def linkshere( title )
+    redirect = redirect? title
+    json = api_get( { action: "query",
+                      titles: redirect || title,
                       prop: "linkshere",
                       lhnamespace: 0,
                       lhlimit: :max,
@@ -40,9 +56,10 @@ class WikipediaDocs
   end
 
   def revisions( title )
+    redirect = redirect? title
     params = {
       action: "query",
-      titles: title,
+      titles: redirect || title,
       prop: "revisions",
       rvlimit: :max,
       format: :json,
@@ -84,10 +101,11 @@ class WikipediaDocs
         else
           section = nil
         end
-      when /^\*\s*\[\[(\d+)年\]\]\s*[:\-]?\s*(.*)$/
+      when /^\*\s*\[\[(\d+)年\]\](（.*?\d+年.*?）)?\s*[:\-]?\s*(.*)$/
         next if section.nil?
         year = $1.to_i
-        text = $2
+        jp_year = $2
+        text = $3
         result[ section ] ||= {}
         result[ section ][ year ] ||= []
         result[ section ][ year ] << text
@@ -95,11 +113,42 @@ class WikipediaDocs
     end
     result
   end
+
+  def wikitext2text( wikitext )
+    text = wikitext.gsub( /\[\[(.+?)(\|.+?)?\]\]/ ) do |m|
+      pagename = $1
+      pagename_s = $2
+      if pagename_s
+        if pagename_s.size > 1
+          pagename_s[1..-1]
+        else
+          pagename.sub( / \(.+\)\Z/, "" )
+        end
+      else
+        pagename
+      end
+    end
+    text
+  end
 end
 
 if $0 == __FILE__
   jawp = WikipediaDocs.new
-  pp jawp.day_info
-  pp jawp.linkshere( "9月1日" )
-  pp jawp.revisions( "9月1日" )
+  data = jawp.day_info
+  #pp jawp.linkshere( "9月1日" )
+  #pp jawp.revisions( "9月1日" )
+  data[ :event ].each do |k,v|
+    v.each do |s|
+      text = jawp.wikitext2text( s )
+      puts text
+      result = []
+      s.scan( /\[\[(.+?)(\|.+?)?\]\]/ ).each do |e|
+        article = e.first
+        backlinks = jawp.linkshere( article )
+        revisions = jawp.revisions( article )
+        result << [ article, backlinks.size, revisions.size ]
+      end
+      p result
+    end
+  end
 end
