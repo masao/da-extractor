@@ -113,11 +113,22 @@ class WikipediaDocs
     result
   end
   
+  LINK_REGEXP = /\[\[(.+?)(\|.+?)?\]\]/
   def list_info
+    wikitext = get_content "一覧の一覧"
+    lists = []
+    wikitext.split( /\r?\n/ ).each do |line|
+      case line
+      when /\A\*\s*#{ LINK_REGEXP }/
+        article = $1
+        lists << article
+      end
+    end
+    lists
   end
 
   def wikitext2text( wikitext )
-    text = wikitext.gsub( /<!--.*?-->/, "" ).gsub( /\[\[(.+?)(\|.+?)?\]\]/ ) do |m|
+    text = wikitext.gsub( /<!--.*?-->/, "" ).gsub( LINK_REGEXP ) do |m|
       pagename = $1
       pagename_s = $2
       if pagename_s
@@ -136,6 +147,8 @@ end
 
 if $0 == __FILE__
   jawp = WikipediaDocs.new
+  data = jawp.list_info
+  pp data
   data = jawp.day_info
   #pp jawp.linkshere( "9月1日" )
   #pp jawp.revisions( "9月1日" )
@@ -144,7 +157,7 @@ if $0 == __FILE__
       text = jawp.wikitext2text( s )
       puts text
       result = []
-      s.scan( /\[\[(.+?)(\|.+?)?\]\]/ ).each do |e|
+      s.scan( WikipediaDocs::LINK_REGEXP ).each do |e|
         article = e.first
         backlinks = jawp.linkshere( article )
         revisions = jawp.revisions( article )
