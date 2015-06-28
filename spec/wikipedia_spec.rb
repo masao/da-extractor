@@ -16,4 +16,15 @@ describe WikipediaDocs do
       expect( obj["query"]["pages"].values.first["title"] ).to eq "Main Page"
     end
   end
+  describe "#day_info" do
+    it "should return valid results from September 1st" do
+      jawp = WikipediaDocs.new
+      data = jawp.day_info( Date.new( 2015, 9, 1 ) )
+      expect( data ).to have_key :event
+      expect( data ).to have_key :birth
+      expect( data ).to have_key :death
+      expect( data[:event] ).to have_key 1923
+      expect( data[:event][1923].first ).to include( "関東大震災" )
+    end
+  end
 end

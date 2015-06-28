@@ -39,7 +39,7 @@ class WikipediaDocs
     obj["query"]["pages"].values.first["linkshere"]
   end
 
-  def day_info( date )
+  def day_info( date = Date.today )
     title = "#{ date.month }月#{ date.day }日"
     json = api_get( { action: "query",
                       titles: title,
@@ -79,6 +79,5 @@ end
 
 if $0 == __FILE__
   jawp = WikipediaDocs.new
-  date = Date.today
-  pp jawp.day_info( date )
+  pp jawp.day_info
 end
