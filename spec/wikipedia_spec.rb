@@ -45,6 +45,13 @@ describe WikipediaDocs do
       expect( data[:birth][1227].first ).not_to match /安貞/
     end
   end
+  describe "#list_info" do
+    it "should return valid results" do
+      jawp = WikipediaDocs.new
+      data = jawp.list_info
+      expect( data ).not_to be_empty
+    end
+  end
   describe "#linkshere" do
     it "should return valid results from September 1st" do
       jawp = WikipediaDocs.new
@@ -66,6 +73,14 @@ describe WikipediaDocs do
       expect( text ).to eq "オーストリアとセルビアが密約を結び、セルビアはオーストリアの保護国化される。"
       text = jawp.wikitext2text( "<!-- foo -->" )
       expect( text ).to be_empty
+    end
+  end
+  describe "#parse_line" do
+    it "should parse wikitext" do
+      jawp = WikipediaDocs.new
+      data = jawp.parse_line "[[承久の乱]]: 幕府に敗れた[[後鳥羽天皇|後鳥羽上皇]]が隠岐に流される。"
+      expect( data[0] ).to eq "承久の乱"
+      expect( data[1] ).to eq "後鳥羽天皇"
     end
   end
   describe "#get_content" do

@@ -145,6 +145,9 @@ class WikipediaDocs
     end
     text
   end
+  def parse_line( wikitext )
+    wikitext.scan( LINK_REGEXP ).map{|e| e.first }
+  end
 end
 
 if $0 == __FILE__
